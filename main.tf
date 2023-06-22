@@ -8,6 +8,15 @@ resource "aws_s3_bucket" "exercitiu_bucket" {
   bucket = "exercitiu-${random_id.id.hex}"
 }
 
+resource "aws_s3_bucket_public_access_block" "exercitiu_bucket_public_access_block" {
+  bucket = aws_s3_bucket.exercitiu_bucket.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
 # Creare de VPC
 resource "aws_vpc" "exercitiu_vpc" {
   cidr_block = "10.0.0.0/16"
