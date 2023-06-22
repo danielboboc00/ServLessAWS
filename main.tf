@@ -52,3 +52,30 @@ resource "aws_db_subnet_group" "exercitiu_db_subnet_group" {
   name       = "exercitiu-db-subnet-group"
   subnet_ids = [aws_subnet.exercitiu_subnet_1.id, aws_subnet.exercitiu_subnet_2.id]
 }
+
+resource "aws_internet_gateway" "exercitiu_igw" {
+  vpc_id = aws_vpc.exercitiu_vpc.id
+
+  tags = {
+    Name = "exercitiu-igw"
+  }
+}
+
+resource "aws_route_table" "exercitiu_rt" {
+  vpc_id = aws_vpc.exercitiu_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.exercitiu_igw.id
+  }
+
+  tags = {
+    Name = "exercitiu-rt"
+  }
+}
+
+resource "aws_main_route_table_association" "exercitiu_a" {
+  vpc_id         = aws_vpc.exercitiu_vpc.id
+  route_table_id = aws_route_table.exercitiu_rt.id
+}
+
