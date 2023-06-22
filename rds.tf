@@ -6,7 +6,7 @@ resource "aws_db_instance" "exercitiu_db" {
   engine_version                  = "8.0"
   instance_class                  = "db.t2.micro"
   username                        = "lambda"
-  password                        = "devopsdevops" // Please replace it with your desired password
+  password                        = "devopsdevops" 
   parameter_group_name            = "default.mysql8.0"
   skip_final_snapshot             = true
   publicly_accessible             = false
@@ -16,7 +16,7 @@ resource "aws_db_instance" "exercitiu_db" {
   db_subnet_group_name            = aws_db_subnet_group.exercitiu_db_subnet_group.name
 }
 
-// security grou[]
+// security group
 resource "aws_security_group" "sg_exercitiu" {
   name        = "sg_lambda_to_rds"
   description = "inbound de la Lambda to RDS"
