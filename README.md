@@ -7,3 +7,4 @@
 # compiled go files
 # certificates for RDS downloaded from the internet (https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem)
 # bundled everything into a deployment.zip 
+# created the lambda function which provides information about "files"
