@@ -49,10 +49,11 @@ resource "aws_instance" "exercitiu_instance" {
   ami           = "ami-0331ebbf81138e4de"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.exercitiu_subnet_1.id
+  associate_public_ip_address = true
 
   vpc_security_group_ids = [aws_security_group.sg_exercitiu.id]
 
-  key_name = aws_key_pair.deployer.key_name // use the name of the key pair you just created
+  key_name = aws_key_pair.deployer.key_name 
 
   tags = {
     Name = "exercitiu-instance"

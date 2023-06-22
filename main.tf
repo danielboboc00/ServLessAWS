@@ -28,8 +28,8 @@ resource "aws_vpc" "exercitiu_vpc" {
 
 // Subnet Creation
 resource "aws_subnet" "exercitiu_subnet_1" {
-  vpc_id     = aws_vpc.exercitiu_vpc.id
-  cidr_block = "10.0.7.0/24"
+  vpc_id            = aws_vpc.exercitiu_vpc.id
+  cidr_block        = "10.0.7.0/24"
   availability_zone = "us-east-2b"
 
   tags = {
@@ -38,8 +38,8 @@ resource "aws_subnet" "exercitiu_subnet_1" {
 }
 
 resource "aws_subnet" "exercitiu_subnet_2" {
-  vpc_id     = aws_vpc.exercitiu_vpc.id
-  cidr_block = "10.0.8.0/24"
+  vpc_id            = aws_vpc.exercitiu_vpc.id
+  cidr_block        = "10.0.8.0/24"
   availability_zone = "us-east-2c"
 
   tags = {
