@@ -52,7 +52,7 @@ resource "aws_lambda_function" "files" {
   filename      = "files/deployment.zip"
   function_name = "files"
   role          = aws_iam_role.lambda_execution_role.arn
-  handler       = "main"
+  handler       = "files"
   runtime       = "go1.x"
 
   environment {
