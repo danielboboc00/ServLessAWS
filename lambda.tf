@@ -14,7 +14,6 @@ resource "aws_iam_role" "lambda_execution_role" {
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role_policy.json
 }
 
-# Create an IAM policy that allows writing to an RDS database and writing logs to CloudWatch Logs
 resource "aws_iam_policy" "lambda_execution_policy" {
   name = "lambda_execution_policy"
 
@@ -34,7 +33,21 @@ resource "aws_iam_policy" "lambda_execution_policy" {
         Effect = "Allow"
         Action = [
           "rds-data:ExecuteStatement",
-          "rds-data:BatchExecuteStatement"
+          "rds-data:BatchExecuteStatement",
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow",
+        Action = ["rds-db:connect"]
+        Resource = ["arn:aws:rds-db:us-east-2:193118517679:dbuser:*/lambda"]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:CreateNetworkInterface",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DeleteNetworkInterface"
         ]
         Resource = "*"
       }
@@ -50,16 +63,22 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachment" {
 
 resource "aws_lambda_function" "files" {
   filename      = "files/deployment.zip"
-  function_name = "files"
+  function_name = "handler"
   role          = aws_iam_role.lambda_execution_role.arn
   handler       = "files"
   runtime       = "go1.x"
+  timeout       = 5
+
+  vpc_config {
+    subnet_ids         = [aws_subnet.exercitiu_subnet_public.id] // changed to public subnet
+    security_group_ids = [aws_security_group.sg_exercitiu.id]
+  }
 
   environment {
     variables = {
       DB_REGION   = "us-east-2"
       DB_USERNAME = "lambda"
-      DB_HOST     = "exercitiul-03302199317f7830.cgqpv2n3kmvi.us-east-2.rds.amazonaws.com"
+      DB_HOST     = "exercitiul-b817194fce0f0c50.cgqpv2n3kmvi.us-east-2.rds.amazonaws.com"
       DB_PORT     = "3306"
       DB_NAME     = "DevOps"
     }
@@ -99,6 +118,5 @@ resource "aws_lambda_permission" "apigw" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.files.function_name
   principal     = "apigateway.amazonaws.com"
-
   source_arn = "${aws_api_gateway_rest_api.api_gateway.execution_arn}/*/*"
 }
