@@ -26,34 +26,17 @@ resource "aws_vpc" "exercitiu_vpc" {
   }
 }
 
-// Subnet Creation
-resource "aws_subnet" "exercitiu_subnet_1" {
+// Public Subnet Creation
+resource "aws_subnet" "exercitiu_subnet_public" {
   vpc_id            = aws_vpc.exercitiu_vpc.id
-  cidr_block        = "10.0.7.0/24"
-  availability_zone = "us-east-2b"
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-east-2a"
 
   tags = {
-    Name = "exercitiu-subnet-1"
+    Name = "exercitiu-subnet-public"
   }
 }
 
-resource "aws_subnet" "exercitiu_subnet_2" {
-  vpc_id            = aws_vpc.exercitiu_vpc.id
-  cidr_block        = "10.0.8.0/24"
-  availability_zone = "us-east-2c"
-
-  tags = {
-    Name = "exercitiu-subnet-2"
-  }
-}
-
-// Subnet group creation
-resource "aws_db_subnet_group" "exercitiu_db_subnet_group" {
-  name       = "exercitiu-db-subnet-group"
-  subnet_ids = [aws_subnet.exercitiu_subnet_1.id, aws_subnet.exercitiu_subnet_2.id]
-}
-
-// Internet gateway creation
 resource "aws_internet_gateway" "exercitiu_igw" {
   vpc_id = aws_vpc.exercitiu_vpc.id
 
@@ -76,7 +59,30 @@ resource "aws_route_table" "exercitiu_rt" {
   }
 }
 
-resource "aws_main_route_table_association" "exercitiu_a" {
-  vpc_id         = aws_vpc.exercitiu_vpc.id
+resource "aws_route_table_association" "exercitiu_a_public" {
+  subnet_id      = aws_subnet.exercitiu_subnet_public.id
   route_table_id = aws_route_table.exercitiu_rt.id
+}
+
+// EC2 instance
+resource "aws_instance" "exercitiu_instance" {
+  ami           = "ami-0331ebbf81138e4de"
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.exercitiu_subnet_public.id
+  associate_public_ip_address = true
+
+  vpc_security_group_ids = [aws_security_group.sg_exercitiu.id]
+
+  key_name = aws_key_pair.deployer.key_name 
+
+  tags = {
+    Name = "exercitiu-instance"
+  }
+
+  user_data = base64encode(jsonencode({
+    "commands" : [
+      "sudo yum update -y",
+      "sudo yum install -y mysql"
+    ]
+  }))
 }
