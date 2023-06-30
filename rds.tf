@@ -6,7 +6,7 @@ resource "aws_db_instance" "exercitiu_db" {
   engine_version                  = "8.0"
   instance_class                  = "db.t2.micro"
   username                        = "lambda"
-  password                        = "Abecedar10!" 
+  password                        = "devopsdevops" 
   parameter_group_name            = "default.mysql8.0"
   skip_final_snapshot             = true
   publicly_accessible             = false

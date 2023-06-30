@@ -55,7 +55,6 @@ resource "aws_iam_policy" "lambda_execution_policy" {
   })
 }
 
-# Attach the IAM policy to the IAM role for the Lambda function
 resource "aws_iam_role_policy_attachment" "lambda_execution_policy_attachment" {
   role       = aws_iam_role.lambda_execution_role.name
   policy_arn = aws_iam_policy.lambda_execution_policy.arn
@@ -78,7 +77,7 @@ resource "aws_lambda_function" "files" {
     variables = {
       DB_REGION   = "us-east-2"
       DB_USERNAME = "lambda"
-      DB_HOST     = "exercitiul-b817194fce0f0c50.cgqpv2n3kmvi.us-east-2.rds.amazonaws.com"
+      DB_HOST     = "exercitiul-9ef5d129117caf09.cgqpv2n3kmvi.us-east-2.rds.amazonaws.com"
       DB_PORT     = "3306"
       DB_NAME     = "DevOps"
     }
@@ -93,7 +92,7 @@ resource "aws_api_gateway_rest_api" "api_gateway" {
 resource "aws_api_gateway_resource" "resource" {
   rest_api_id = aws_api_gateway_rest_api.api_gateway.id
   parent_id   = aws_api_gateway_rest_api.api_gateway.root_resource_id
-  path_part   = "{proxy+}"
+  path_part   = "{id}"
 }
 
 resource "aws_api_gateway_method" "proxy" {
@@ -101,6 +100,10 @@ resource "aws_api_gateway_method" "proxy" {
   resource_id   = aws_api_gateway_resource.resource.id
   http_method   = "ANY"
   authorization = "NONE"
+
+  request_parameters = {
+    "method.request.path.id" = true
+  }
 }
 
 resource "aws_api_gateway_integration" "lambda" {
@@ -111,6 +114,10 @@ resource "aws_api_gateway_integration" "lambda" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.files.invoke_arn
+
+  request_parameters = {
+    "integration.request.path.id" = "method.request.path.id"
+  }
 }
 
 resource "aws_lambda_permission" "apigw" {
@@ -118,5 +125,19 @@ resource "aws_lambda_permission" "apigw" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.files.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn = "${aws_api_gateway_rest_api.api_gateway.execution_arn}/*/*"
+  source_arn    = "${aws_api_gateway_rest_api.api_gateway.execution_arn}/*/*"
+}
+
+resource "aws_api_gateway_deployment" "deployment" {
+  depends_on  = [aws_api_gateway_integration.lambda]
+
+  rest_api_id = aws_api_gateway_rest_api.api_gateway.id
+  stage_name  = "prod"
+  description = "Deploying the prod stage"
+  
+  stage_description = "Production stage"
+}
+
+output "invoke_url" {
+  value = "https://${aws_api_gateway_rest_api.api_gateway.id}.execute-api.us-east-2.amazonaws.com/${aws_api_gateway_deployment.deployment.stage_name}"
 }
