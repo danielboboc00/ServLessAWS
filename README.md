@@ -1,7 +1,3 @@
-# curly-barnacle
-# https://github.com/danielboboc00/glowing-broccoli
-
-
 # created s3 bucket
 # created the ec2 instance 
 # vpc + subnets , route tables
